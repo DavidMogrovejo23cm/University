@@ -13,7 +13,6 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
     console.log('🌱 Seeding Academic Database...');
 
-    // Seed Specialities
     const specialities = [
         { id: 1, name: 'Tecnología', description: 'Especialidad en tecnología y sistemas' },
         { id: 2, name: 'Salud', description: 'Especialidad en ciencias de la salud' },
@@ -30,7 +29,6 @@ async function main() {
 
     console.log('✅ Specialities created');
 
-    // Seed Careers
     const careers = [
         { id: 1, name: 'Ingeniería en Software', totalCicles: 10, durationYears: 5 },
         { id: 2, name: 'Medicina', totalCicles: 12, durationYears: 6 },
@@ -49,7 +47,6 @@ async function main() {
 
     console.log('✅ Careers created');
 
-    // Seed Cycles
     const cycles = [
         {
             id: 1,
@@ -95,7 +92,6 @@ async function main() {
 
     console.log('✅ Cycles created');
 
-    // Seed Subjects for Ingeniería en Software (Career ID: 1)
     const subjects = [
         { name: 'Programación I', careerId: 1, cicleNumber: 1, cycleId: 3 },
         { name: 'Matemáticas I', careerId: 1, cicleNumber: 1, cycleId: 3 },

@@ -13,7 +13,6 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
     console.log('🌱 Seeding Profiles Database...');
 
-    // Seed Speciality References (sync from academic DB)
     const specialityReferences = [
         { id: 1, name: 'Tecnología' },
         { id: 2, name: 'Salud' },
@@ -30,7 +29,6 @@ async function main() {
 
     console.log('✅ Speciality references created');
 
-    // Seed Career References (sync from academic DB)
     const careerReferences = [
         { id: 1, name: 'Ingeniería en Software', totalCicles: 10 },
         { id: 2, name: 'Medicina', totalCicles: 12 },
@@ -49,7 +47,6 @@ async function main() {
 
     console.log('✅ Career references created');
 
-    // Seed Subject References (sync from academic DB)
     const subjectReferences = [
         { id: 1, name: 'Programación I', careerId: 1, cicleNumber: 1 },
         { id: 2, name: 'Matemáticas I', careerId: 1, cicleNumber: 1 },

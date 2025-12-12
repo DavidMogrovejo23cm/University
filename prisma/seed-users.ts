@@ -13,7 +13,6 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
     console.log('🌱 Seeding Users Database...');
 
-    // Seed Roles
     const roles = [
         { id: 1, name: 'ADMIN' },
         { id: 2, name: 'TEACHER' },
@@ -30,7 +29,6 @@ async function main() {
 
     console.log('✅ Roles created: ADMIN, TEACHER, STUDENT');
 
-    // Seed Admin User (optional)
     const bcrypt = require('bcrypt');
     const adminPassword = bcrypt.hashSync('admin123', 10);
 
@@ -41,7 +39,7 @@ async function main() {
             name: 'Administrador',
             email: 'admin@sudamericano.edu.ec',
             password: adminPassword,
-            roleId: 1, // ADMIN
+            roleId: 1,
             status: 'active',
         },
     });

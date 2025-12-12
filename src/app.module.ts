@@ -10,18 +10,11 @@ import { SubjectModule } from './subject/subject.module';
 import { StudentsubjectModule } from './studentsubject/studentsubject.module';
 import { StudentModule } from './student/student.module';
 import { AuthModule } from './auth/auth.module';
-import { PrismaUsersService } from './prisma/prisma-users.service';
-import { PrismaAcademicService } from './prisma/prisma-academic.service';
-import { PrismaProfilesService } from './prisma/prisma-profiles.service';
 import { CycleModule } from './cycle/cycle.module';
-
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
-    }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     PrismaModule,
     SpecialityModule,
     CareerModule,
@@ -30,19 +23,9 @@ import { CycleModule } from './cycle/cycle.module';
     StudentsubjectModule,
     StudentModule,
     AuthModule,
-    CycleModule
+    CycleModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    PrismaUsersService,
-    PrismaAcademicService,
-    PrismaProfilesService,
-  ],
-  exports: [
-    PrismaUsersService,
-    PrismaAcademicService,
-    PrismaProfilesService,
-  ]
+  providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

@@ -51,6 +51,8 @@ model SubjectReference {
   name            String
   careerId        Int                 @map("career_id")
   cicleNumber     Int                 @map("cicle_number")
+  maxQuota        Int                 @default(30) @map("max_quota")
+  availableQuota  Int                 @default(30) @map("available_quota")
   syncedAt        DateTime            @default(now()) @map("synced_at")
   subjectAssignments SubjectAssignment[]
   studentSubjects StudentSubject[]

@@ -39,4 +39,12 @@ export class SubjectController {
   remove(@Param('id') id: string) {
     return this.subjectService.remove(+id);
   }
+
+  // ============ ADVANCED QUERIES ============
+
+  @ApiOperation({ summary: 'Get all subjects for a specific career' })
+  @Get('by-career/:careerId')
+  findSubjectsByCareer(@Param('careerId') careerId: string) {
+    return this.subjectService.findSubjectsByCareer(+careerId);
+  }
 }

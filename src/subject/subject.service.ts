@@ -151,4 +151,38 @@ export class SubjectService {
       throw new InternalServerErrorException('Error removing subject');
     }
   }
+
+  // ============ PARTE 1: CONSULTAS DERIVADAS ============
+
+  /**
+   * Obtener las materias asociadas a una carrera específica
+   */
+  async findSubjectsByCareer(careerId: number) {
+    try {
+      const subjects = await this.prisma.subject.findMany({
+        where: {
+          careerId: careerId
+        },
+        include: {
+          career: true,
+          cycle: true
+        },
+        orderBy: [
+          { cicleNumber: 'asc' },
+          { name: 'asc' }
+        ]
+      });
+
+      if (subjects.length === 0) {
+        throw new NotFoundException(`No subjects found for career with ID ${careerId}`);
+      }
+
+      return subjects;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error fetching subjects by career');
+    }
+  }
 }

@@ -167,4 +167,134 @@ export class TeacherService {
       throw new InternalServerErrorException('Error removing teacher');
     }
   }
+
+  // ============ PARTE 1: CONSULTAS DERIVADAS ============
+
+  /**
+   * Listar los docentes que imparten más de una asignatura
+   */
+  async findTeachersWithMultipleSubjects() {
+    try {
+      const teachers = await this.prisma.userReference.findMany({
+        where: {
+          roleId: 2, // TEACHER
+          teacherProfile: {
+            subjects: {
+              // We need at least 2 subjects
+            }
+          }
+        },
+        include: {
+          teacherProfile: {
+            include: {
+              speciality: true,
+              career: true,
+              subjects: {
+                include: {
+                  subject: true
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Filter teachers with more than one subject
+      const teachersWithMultipleSubjects = teachers.filter(
+        teacher => teacher.teacherProfile && teacher.teacherProfile.subjects.length > 1
+      );
+
+      return teachersWithMultipleSubjects;
+    } catch (error) {
+      throw new InternalServerErrorException('Error fetching teachers with multiple subjects');
+    }
+  }
+
+  // ============ PARTE 2: OPERACIONES LÓGICAS ============
+
+  /**
+   * Filtrar docentes con operadores lógicos AND/OR/NOT
+   * Ejemplo: tiempo completo AND (dictan asignaturas OR NO están inactivos)
+   */
+  async findTeachersWithLogicalFilters(filters: {
+    specialityId?: number;
+    careerId?: number;
+    hasSubjects?: boolean;
+    status?: string;
+    excludeInactive?: boolean;
+  }) {
+    try {
+      const { specialityId, careerId, hasSubjects, status = 'active', excludeInactive = true } = filters;
+
+      const whereConditions: any = {
+        roleId: 2, // TEACHER
+        AND: []
+      };
+
+      // NOT inactive (if excludeInactive is true)
+      if (excludeInactive) {
+        whereConditions.AND.push({
+          NOT: {
+            status: 'inactive'
+          }
+        });
+      } else if (status) {
+        whereConditions.AND.push({
+          status: status
+        });
+      }
+
+      // Teacher profile filters
+      const teacherProfileConditions: any = {};
+
+      if (specialityId) {
+        teacherProfileConditions.specialityId = specialityId;
+      }
+
+      if (careerId) {
+        teacherProfileConditions.careerId = careerId;
+      }
+
+      if (Object.keys(teacherProfileConditions).length > 0) {
+        whereConditions.AND.push({
+          teacherProfile: teacherProfileConditions
+        });
+      }
+
+      const teachers = await this.prisma.userReference.findMany({
+        where: whereConditions,
+        include: {
+          teacherProfile: {
+            include: {
+              speciality: true,
+              career: true,
+              subjects: {
+                include: {
+                  subject: true
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Post-filter for hasSubjects (OR condition)
+      let filteredTeachers = teachers;
+      if (hasSubjects !== undefined) {
+        if (hasSubjects) {
+          filteredTeachers = teachers.filter(
+            teacher => teacher.teacherProfile && teacher.teacherProfile.subjects.length > 0
+          );
+        } else {
+          filteredTeachers = teachers.filter(
+            teacher => !teacher.teacherProfile || teacher.teacherProfile.subjects.length === 0
+          );
+        }
+      }
+
+      return filteredTeachers;
+    } catch (error) {
+      throw new InternalServerErrorException('Error fetching teachers with logical filters');
+    }
+  }
 }

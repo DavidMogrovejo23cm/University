@@ -18,8 +18,8 @@ async function bootstrap() {
 
   SwaggerModule.setup('api', app, SwaggerModule.createDocument(app, config));
 
-  await app.listen(process.env.PORT ?? 3000);
-  console.log(`Docs: http://localhost:3000/api`);
+  await app.listen(process.env.PORT ?? 5000);
+  console.log(`Docs: http://localhost:5000/api`);
 }
 
 void bootstrap();

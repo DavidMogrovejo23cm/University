@@ -39,4 +39,20 @@ export class StudentsubjectController {
   remove(@Param('id') id: string) {
     return this.studentsubjectService.remove(+id);
   }
+
+  // ============ TRANSACTIONAL ENROLLMENT ============
+
+  @ApiOperation({
+    summary: 'Enroll student with ACID transaction',
+    description: 'Enrolls a student in a subject with automatic quota management and rollback on failure'
+  })
+  @Post('enroll-transactional')
+  enrollStudentWithTransaction(
+    @Body() enrollmentData: { studentProfileId: number; subjectId: number }
+  ) {
+    return this.studentsubjectService.enrollStudentWithTransaction(
+      enrollmentData.studentProfileId,
+      enrollmentData.subjectId
+    );
+  }
 }

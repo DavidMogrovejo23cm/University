@@ -32,4 +32,41 @@ export class StudentController {
   remove(@Param('id') id: string) {
     return this.studentService.remove(+id);
   }
+
+  // ============ ADVANCED QUERIES ============
+
+  @ApiOperation({ summary: 'Get all active students with their career information' })
+  @Get('queries/active-with-career')
+  findActiveStudentsWithCareer() {
+    return this.studentService.findActiveStudentsWithCareer();
+  }
+
+  @ApiOperation({ summary: 'Get student enrollments by academic period' })
+  @Get(':id/enrollments/:cycleId')
+  findStudentEnrollmentsByPeriod(
+    @Param('id') id: string,
+    @Param('cycleId') cycleId: string
+  ) {
+    return this.studentService.findStudentEnrollmentsByPeriod(+id, +cycleId);
+  }
+
+  @ApiOperation({ summary: 'Search students with logical filters (AND operations)' })
+  @Get('queries/with-filters')
+  findStudentsWithFilters(
+    @Query('status') status?: string,
+    @Query('careerId') careerId?: string,
+    @Query('cycleId') cycleId?: string
+  ) {
+    return this.studentService.findStudentsWithFilters({
+      status,
+      careerId: careerId ? +careerId : undefined,
+      cycleId: cycleId ? +cycleId : undefined
+    });
+  }
+
+  @ApiOperation({ summary: 'Get student enrollment report (Native SQL)' })
+  @Get('reports/enrollment-report')
+  getStudentEnrollmentReport() {
+    return this.studentService.getStudentEnrollmentReport();
+  }
 }

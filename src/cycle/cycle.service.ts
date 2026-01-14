@@ -10,7 +10,6 @@ export class CycleService {
 
   async create(createCycleDto: CreateCycleDto) {
     try {
-      // Si se marca como activo, desactivar otros ciclos
       if (createCycleDto.isActive) {
         await this.prisma.cycle.updateMany({
           where: { isActive: true },
@@ -123,10 +122,8 @@ export class CycleService {
 
   async update(id: number, updateCycleDto: UpdateCycleDto) {
     try {
-      // Verificar que el ciclo existe
       await this.findOne(id);
 
-      // Si se marca como activo, desactivar otros ciclos
       if (updateCycleDto.isActive) {
         await this.prisma.cycle.updateMany({
           where: {
@@ -163,8 +160,13 @@ export class CycleService {
 
   async remove(id: number) {
     try {
-      // Verificar que el ciclo existe
-      await this.findOne(id);
+      const existingCycle = await this.prisma.cycle.findUnique({
+        where: { id },
+      });
+
+      if (!existingCycle) {
+        throw new NotFoundException(`Ciclo con ID ${id} no encontrado`);
+      }
 
       await this.prisma.cycle.delete({
         where: { id },

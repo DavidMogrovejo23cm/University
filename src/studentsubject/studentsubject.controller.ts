@@ -40,7 +40,6 @@ export class StudentsubjectController {
     return this.studentsubjectService.remove(+id);
   }
 
-  // ============ TRANSACTIONAL ENROLLMENT ============
 
   @ApiOperation({
     summary: 'Enroll student with ACID transaction',

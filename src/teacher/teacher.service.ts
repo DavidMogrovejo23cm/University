@@ -100,20 +100,15 @@ export class TeacherService {
         }
       }
 
-      // Prepare update data for user (UserReference only has name and email)
       const userUpdateData = {
         ...(updateTeacherDto.name && { name: updateTeacherDto.name }),
         ...(updateTeacherDto.email && { email: updateTeacherDto.email }),
-        // phone and age are not in UserReference
       };
 
-      // Prepare update data for teacher profile
       const profileUpdateData = {
         ...(updateTeacherDto.specialityId && { specialityId: updateTeacherDto.specialityId }),
         ...(updateTeacherDto.careerId && { careerId: updateTeacherDto.careerId }),
       };
-
-      // Update user and profile
       const updatedUser = await this.prisma.userReference.update({
         where: { id },
         data: {
@@ -154,7 +149,6 @@ export class TeacherService {
         throw new NotFoundException(`Teacher with ID ${id} not found`);
       }
 
-      // Delete will cascade to teacherProfile due to the schema configuration
       await this.prisma.userReference.delete({
         where: { id }
       });
@@ -168,20 +162,14 @@ export class TeacherService {
     }
   }
 
-  // ============ PARTE 1: CONSULTAS DERIVADAS ============
 
-  /**
-   * Listar los docentes que imparten más de una asignatura
-   */
   async findTeachersWithMultipleSubjects() {
     try {
       const teachers = await this.prisma.userReference.findMany({
         where: {
           roleId: 2, // TEACHER
           teacherProfile: {
-            subjects: {
-              // We need at least 2 subjects
-            }
+            subjects: {}
           }
         },
         include: {
@@ -199,7 +187,6 @@ export class TeacherService {
         }
       });
 
-      // Filter teachers with more than one subject
       const teachersWithMultipleSubjects = teachers.filter(
         teacher => teacher.teacherProfile && teacher.teacherProfile.subjects.length > 1
       );
@@ -210,12 +197,7 @@ export class TeacherService {
     }
   }
 
-  // ============ PARTE 2: OPERACIONES LÓGICAS ============
 
-  /**
-   * Filtrar docentes con operadores lógicos AND/OR/NOT
-   * Ejemplo: tiempo completo AND (dictan asignaturas OR NO están inactivos)
-   */
   async findTeachersWithLogicalFilters(filters: {
     specialityId?: number;
     careerId?: number;
@@ -231,7 +213,6 @@ export class TeacherService {
         AND: []
       };
 
-      // NOT inactive (if excludeInactive is true)
       if (excludeInactive) {
         whereConditions.AND.push({
           NOT: {
@@ -244,7 +225,6 @@ export class TeacherService {
         });
       }
 
-      // Teacher profile filters
       const teacherProfileConditions: any = {};
 
       if (specialityId) {
@@ -278,7 +258,6 @@ export class TeacherService {
         }
       });
 
-      // Post-filter for hasSubjects (OR condition)
       let filteredTeachers = teachers;
       if (hasSubjects !== undefined) {
         if (hasSubjects) {

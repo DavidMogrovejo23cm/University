@@ -33,7 +33,6 @@ export class StudentController {
     return this.studentService.remove(+id);
   }
 
-  // ============ ADVANCED QUERIES ============
 
   @ApiOperation({ summary: 'Get all active students with their career information' })
   @Get('queries/active-with-career')

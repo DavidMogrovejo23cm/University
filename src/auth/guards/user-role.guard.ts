@@ -5,7 +5,7 @@ import { META_ROLES } from '../decorators/role-protected.decorator';
 
 @Injectable()
 export class UserRoleGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(private readonly reflector: Reflector) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
@@ -16,10 +16,10 @@ export class UserRoleGuard implements CanActivate {
       context.getHandler(),
     );
 
-    // Si no hay roles definidos, cualquier usuario autenticado puede acceder
-    if (!roles || roles.length === 0) return true;
+    if (!roles || roles.length === 0) {
+      return true;
+    }
 
-    // Si hay roles definidos, verificar que el usuario tenga uno de ellos
     if (!user || !user.role) {
       throw new ForbiddenException('User role not found');
     }

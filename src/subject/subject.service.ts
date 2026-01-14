@@ -152,11 +152,7 @@ export class SubjectService {
     }
   }
 
-  // ============ PARTE 1: CONSULTAS DERIVADAS ============
 
-  /**
-   * Obtener las materias asociadas a una carrera específica
-   */
   async findSubjectsByCareer(careerId: number) {
     try {
       const subjects = await this.prisma.subject.findMany({

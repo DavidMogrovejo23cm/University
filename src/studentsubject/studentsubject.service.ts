@@ -165,30 +165,9 @@ export class StudentsubjectService {
     }
   }
 
-  // ============ PARTE 4: OPERACIÓN TRANSACCIONAL ============
-
-  /**
-   * Matricular estudiante con transacción ACID
-   * 
-   * Esta operación garantiza:
-   * - ATOMICIDAD: Todas las operaciones se completan o ninguna
-   * - CONSISTENCIA: Los datos quedan en estado válido
-   * - AISLAMIENTO: Las operaciones concurrentes no interfieren
-   * - DURABILIDAD: Los cambios persisten después del commit
-   * 
-   * Pasos:
-   * 1. Verificar que el estudiante esté activo
-   * 2. Verificar disponibilidad de cupos en la asignatura
-   * 3. Registrar la matrícula
-   * 4. Descontar el cupo disponible de la asignatura
-   * 
-   * Si alguna operación falla, toda la transacción se revierte
-   */
   async enrollStudentWithTransaction(studentProfileId: number, subjectId: number) {
     try {
-      // Usar transacción de Prisma para garantizar ACID
       const result = await this.prisma.$transaction(async (prisma) => {
-        // PASO 1: Verificar que el estudiante esté activo
         const studentProfile = await prisma.studentProfile.findUnique({
           where: { id: studentProfileId },
           include: {
@@ -204,7 +183,6 @@ export class StudentsubjectService {
           throw new ConflictException(`Student is not active. Current status: ${studentProfile.user.status}`);
         }
 
-        // PASO 2: Verificar disponibilidad de cupos en la asignatura
         const subject = await prisma.subjectReference.findUnique({
           where: { id: subjectId }
         });
@@ -219,7 +197,6 @@ export class StudentsubjectService {
           );
         }
 
-        // Verificar si el estudiante ya está matriculado en esta materia
         const existingEnrollment = await prisma.studentSubject.findFirst({
           where: {
             studentProfileId: studentProfileId,
@@ -231,7 +208,6 @@ export class StudentsubjectService {
           throw new ConflictException('Student is already enrolled in this subject');
         }
 
-        // PASO 3: Registrar la matrícula
         const enrollment = await prisma.studentSubject.create({
           data: {
             studentProfileId: studentProfileId,
@@ -249,7 +225,6 @@ export class StudentsubjectService {
           }
         });
 
-        // PASO 4: Descontar el cupo disponible de la asignatura
         const updatedSubject = await prisma.subjectReference.update({
           where: { id: subjectId },
           data: {
@@ -270,7 +245,6 @@ export class StudentsubjectService {
           }
         };
       }, {
-        // Configuración de aislamiento para evitar race conditions
         isolationLevel: 'Serializable', // Máximo nivel de aislamiento
         maxWait: 5000, // Esperar máximo 5 segundos por el lock
         timeout: 10000, // Timeout de 10 segundos para la transacción
@@ -279,17 +253,14 @@ export class StudentsubjectService {
       return result;
 
     } catch (error) {
-      // Si es un error conocido, propagarlo
       if (error instanceof NotFoundException || error instanceof ConflictException) {
         throw error;
       }
 
-      // Si es un error de Prisma relacionado con transacciones
       if (error.code === 'P2034') {
         throw new ConflictException('Transaction conflict: Another enrollment is in progress. Please try again.');
       }
 
-      // Error genérico
       throw new InternalServerErrorException(
         `Error enrolling student: ${error.message || 'Unknown error'}`
       );

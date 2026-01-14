@@ -33,7 +33,6 @@ export class TeacherController {
     return this.teacherService.remove(+id);
   }
 
-  // ============ ADVANCED QUERIES ============
 
   @ApiOperation({ summary: 'Get teachers teaching more than one subject' })
   @Get('queries/multiple-subjects')

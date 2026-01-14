@@ -44,11 +44,10 @@ export class AuthService {
 					password: hashedPassword,
 					phone: registerStudentDto.phone,
 					age: registerStudentDto.age,
-					roleId: 3, // 3 = STUDENT
+					roleId: 3,
 				}
 			});
 
-			// Create UserReference and StudentProfile in profiles DB
 			await this.prismaProfiles.userReference.create({
 				data: {
 					id: user.id,
@@ -65,7 +64,6 @@ export class AuthService {
 				}
 			});
 
-			// Remove password from response
 			const { password, ...userWithoutPassword } = user;
 			return userWithoutPassword;
 		} catch (error) {
@@ -92,11 +90,10 @@ export class AuthService {
 					password: hashedPassword,
 					phone: registerTeacherDto.phone,
 					age: registerTeacherDto.age,
-					roleId: 2, // 2 = TEACHER
+					roleId: 2,
 				}
 			});
 
-			// Create UserReference and TeacherProfile in profiles DB
 			await this.prismaProfiles.userReference.create({
 				data: {
 					id: user.id,
@@ -113,7 +110,6 @@ export class AuthService {
 				}
 			});
 
-			// Remove password from response
 			const { password, ...userWithoutPassword } = user;
 			return userWithoutPassword;
 		} catch (error) {

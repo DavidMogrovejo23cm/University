@@ -101,21 +101,16 @@ export class StudentService {
         }
       }
 
-      // Prepare update data for user (UserReference only has name, email, status)
       const userUpdateData = {
         ...(updateStudentDto.name && { name: updateStudentDto.name }),
         ...(updateStudentDto.email && { email: updateStudentDto.email }),
         ...(updateStudentDto.status && { status: updateStudentDto.status }),
-        // phone and age are not in UserReference
       };
 
-      // Prepare update data for student profile
       const profileUpdateData = {
         ...(updateStudentDto.careerId && { careerId: updateStudentDto.careerId }),
         ...(updateStudentDto.currentCicle && { currentCicle: updateStudentDto.currentCicle }),
       };
-
-      // Update user and profile
       const updatedUser = await this.prisma.userReference.update({
         where: { id },
         data: {
@@ -159,7 +154,6 @@ export class StudentService {
         throw new NotFoundException(`Student with ID ${id} not found`);
       }
 
-      // Delete will cascade to studentProfile due to the schema configuration
       await this.prisma.userReference.delete({
         where: { id }
       });
@@ -173,11 +167,7 @@ export class StudentService {
     }
   }
 
-  // ============ PARTE 1: CONSULTAS DERIVADAS ============
 
-  /**
-   * Listar todos los estudiantes activos junto con su carrera
-   */
   async findActiveStudentsWithCareer() {
     try {
       const activeStudents = await this.prisma.userReference.findMany({
@@ -203,12 +193,8 @@ export class StudentService {
     }
   }
 
-  /**
-   * Mostrar las matrículas de un estudiante en un período académico determinado
-   */
   async findStudentEnrollmentsByPeriod(studentId: number, cycleId: number) {
     try {
-      // First verify the student exists
       const student = await this.prisma.userReference.findUnique({
         where: { id: studentId },
         include: {
@@ -224,14 +210,10 @@ export class StudentService {
         throw new NotFoundException(`Student with ID ${studentId} not found`);
       }
 
-      // Get enrollments for the specific cycle
       const enrollments = await this.prisma.studentSubject.findMany({
         where: {
           studentProfileId: student.studentProfile.id,
-          subject: {
-            // Note: We need to join with the academic database to filter by cycle
-            // For now, we'll return all enrollments and note this limitation
-          }
+          subject: {}
         },
         include: {
           subject: true,
@@ -262,12 +244,7 @@ export class StudentService {
     }
   }
 
-  // ============ PARTE 2: OPERACIONES LÓGICAS ============
 
-  /**
-   * Buscar estudiantes con operadores lógicos AND
-   * Filtros: activos AND carrera específica AND período académico
-   */
   async findStudentsWithFilters(filters: {
     status?: string;
     careerId?: number;
@@ -283,7 +260,6 @@ export class StudentService {
         ]
       };
 
-      // Add career filter if provided
       if (careerId) {
         whereConditions.AND.push({
           studentProfile: {
@@ -308,8 +284,6 @@ export class StudentService {
         }
       });
 
-      // If cycleId is provided, filter students who have enrollments
-      // (This is a post-query filter since cycle info is in academic DB)
       let filteredStudents = students;
       if (cycleId !== undefined) {
         filteredStudents = students.filter(student =>
@@ -323,13 +297,7 @@ export class StudentService {
     }
   }
 
-  // ============ PARTE 3: CONSULTA NATIVA ============
 
-  /**
-   * Obtener un reporte con consulta SQL nativa
-   * Muestra: Nombre del estudiante, Carrera, Número total de materias matriculadas
-   * Ordenado por número de materias (descendente)
-   */
   async getStudentEnrollmentReport() {
     try {
       const report = await this.prisma.$queryRaw`
